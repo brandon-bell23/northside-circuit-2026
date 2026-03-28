@@ -93,7 +93,8 @@
 
   /* ── FILTERS ── */
   .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-  .filter-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-dim); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; flex: 1; text-align: center; min-width: 0; }
+  .filter-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border-dim); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .filter-btn.all-games { flex: 1; text-align: center; }
   .filter-btn:hover { border-color: var(--brand); color: var(--white); }
   .filter-btn.active { background: var(--brand); border-color: var(--brand); color: var(--white); font-weight: 500; }
 
@@ -324,7 +325,7 @@ function buildLeaderboard(players, results) {
   html += `</div></div>`;
 
   // ── FILTERS ─────────────────────────────────────────────────────
-  html += `<div class="filters"><button class="filter-btn active" onclick="filterTable('All',this)">All games</button>`;
+  html += `<div class="filters"><button class="filter-btn all-games active" onclick="filterTable('All',this)">All games</button>`;
   GAMES.forEach(g => {
     html += `<button class="filter-btn" onclick="filterTable('${g.name}',this)">${g.icon} ${g.name}</button>`;
   });
@@ -373,13 +374,23 @@ function buildLeaderboard(players, results) {
   document.getElementById("main-content").innerHTML = html;
   window._ranked   = ranked;
   window._maxPts   = maxPts;
+  window._standings = standings;
   renderTable("All");
 }
 
 function renderTable(game) {
-  const ranked   = window._ranked;
-  const maxPts   = window._maxPts;
-  const filtered = game === "All" ? ranked : ranked.filter(p => p.gamePts && p.gamePts[game] > 0);
+  const ranked    = window._ranked;
+  const standings = window._standings;
+  const maxPts    = window._maxPts;
+
+  let filtered;
+  if (game === "All") {
+    filtered = [...ranked]; // already sorted by totalPts
+  } else {
+    filtered = Object.values(standings)
+      .filter(p => p.gamePts && p.gamePts[game] > 0)
+      .sort((a, b) => b.gamePts[game] - a.gamePts[game]);
+  }
   const tbody    = document.getElementById("lb-tbody");
   if (!tbody) return;
 
