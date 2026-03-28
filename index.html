@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Northside Circuit 2026 — Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFD700;
+    --gold-dim: #B8960C;
+    --dark: #0D0D1A;
+    --dark2: #13132A;
+    --dark3: #1C1C38;
+    --card: #181830;
+    --border: rgba(255,255,255,0.07);
+    --text: #E8E8F0;
+    --muted: #7878A0;
+    --accent: #533BD4;
+    --accent2: #7B5CF0;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND GRID ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(83,59,212,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(83,59,212,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .page { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* ── HEADER ── */
+  header {
+    padding: 48px 0 36px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .header-left {}
+  .circuit-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .circuit-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 72px);
+    line-height: 0.9; letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  .circuit-title span { color: var(--gold); }
+  .circuit-sub {
+    margin-top: 10px;
+    font-size: 13px; color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .live-badge {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.25);
+    color: var(--gold);
+    font-size: 11px; font-family: 'DM Mono', monospace;
+    padding: 6px 14px; border-radius: 20px;
+    white-space: nowrap;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+
+  /* ── STAT STRIP ── */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--text); line-height: 1; }
+  .stat-val.gold { color: var(--gold); }
+
+  /* ── PODIUM ── */
+  .podium-section { margin-bottom: 32px; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.16em;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .podium {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px; align-items: end;
+  }
+  .podium-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 16px 18px;
+    text-align: center; position: relative;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .podium-card:hover { transform: translateY(-3px); }
+  .podium-card.p1 {
+    border-color: rgba(255,215,0,0.4);
+    background: linear-gradient(160deg, #1e1a0a 0%, #181830 60%);
+    padding-top: 28px;
+  }
+  .podium-card.p2 { border-color: rgba(192,192,192,0.3); }
+  .podium-card.p3 { border-color: rgba(205,127,50,0.3); }
+  .podium-rank {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px; letter-spacing: 0.1em;
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  }
+  .p1 .podium-rank { color: var(--gold); }
+  .p2 .podium-rank { color: #C0C0C0; }
+  .p3 .podium-rank { color: #CD7F32; }
+  .podium-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 600;
+    overflow: hidden;
+  }
+  .podium-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .p1 .podium-avatar { background: rgba(255,215,0,0.15); color: var(--gold); border: 2px solid rgba(255,215,0,0.4); }
+  .p2 .podium-avatar { background: rgba(192,192,192,0.1); color: #C0C0C0; border: 2px solid rgba(192,192,192,0.3); }
+  .p3 .podium-avatar { background: rgba(205,127,50,0.1); color: #CD7F32; border: 2px solid rgba(205,127,50,0.3); }
+  .podium-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .podium-tag { font-size: 11px; color: var(--muted); font-style: italic; margin-bottom: 10px; }
+  .podium-pts { font-family: 'Bebas Neue', sans-serif; font-size: 30px; line-height: 1; }
+  .p1 .podium-pts { color: var(--gold); }
+  .p2 .podium-pts { color: #C0C0C0; }
+  .p3 .podium-pts { color: #CD7F32; }
+  .podium-pts-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ── FILTERS ── */
+  .filters {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .filter-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent; color: var(--muted);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .filter-btn.active {
+    background: var(--accent); border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    margin-bottom: 32px;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--dark3);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.12em; padding: 12px 16px;
+    text-align: left; white-space: nowrap;
+  }
+  thead th:first-child { width: 48px; text-align: center; }
+  thead th.r { text-align: right; }
+  tbody tr { border-top: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  td { padding: 12px 16px; vertical-align: middle; }
+  td:first-child { text-align: center; }
+  .rank-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; color: var(--muted);
+  }
+  .rank-num.top { color: var(--gold); }
+  .player-cell { display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    width: 36px; height: 36px; min-width: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .p-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .p-tag { font-size: 11px; color: var(--muted); font-style: italic; }
+  .game-pill {
+    font-size: 10px; padding: 3px 9px; border-radius: 10px;
+    background: rgba(83,59,212,0.2); color: #A08EFF;
+    border: 1px solid rgba(83,59,212,0.3);
+    white-space: nowrap; font-family: 'DM Mono', monospace;
+  }
+  .pts-cell { text-align: right; }
+  .pts-main { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); display: block; line-height: 1; }
+  .pts-bar-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 3px; }
+  .pts-bar { width: 70px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .pts-fill { height: 100%; background: var(--accent2); border-radius: 2px; }
+  .events-cell, .avg-cell { text-align: right; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--muted); }
+  .wins-cell { text-align: right; font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--text); }
+
+  /* ── PER-GAME BREAKDOWN ── */
+  .breakdown-section { margin-bottom: 32px; }
+  .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .game-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px;
+  }
+  .game-card-title {
+    font-size: 12px; font-weight: 600; color: var(--text);
+    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .game-icon { font-size: 16px; }
+  .game-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-top: 1px solid var(--border); }
+  .game-row-name { font-size: 12px; color: var(--muted); }
+  .game-row-pts { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); font-weight: 500; }
+  .game-row:first-child { border-top: none; }
+  .game-champ { font-size: 10px; color: var(--gold); font-family: 'DM Mono', monospace; }
+
+  /* ── LOADING / ERROR ── */
+  .loading-state {
+    text-align: center; padding: 80px 20px;
+    color: var(--muted); font-family: 'DM Mono', monospace; font-size: 13px;
+  }
+  .loading-spinner {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--border); border-top-color: var(--accent2);
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-box {
+    background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3);
+    border-radius: 12px; padding: 24px; text-align: center;
+    color: #E74C3C; font-family: 'DM Mono', monospace; font-size: 13px;
+  }
+  .setup-box {
+    background: rgba(83,59,212,0.08); border: 1px solid rgba(83,59,212,0.25);
+    border-radius: 14px; padding: 32px; text-align: center; margin: 20px 0;
+  }
+  .setup-box h2 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold); margin-bottom: 12px; }
+  .setup-box p { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 8px; }
+  .setup-box code { font-family: 'DM Mono', monospace; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #A08EFF; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 24px; margin-top: 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer-brand { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--muted); letter-spacing: 0.06em; }
+  .footer-note { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  @media (max-width: 600px) {
+    .podium { grid-template-columns: 1fr; }
+    thead th.hide-sm, td.hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="header-left">
+      <div class="circuit-eyebrow">Season 2026 &bull; Live Standings</div>
+      <div class="circuit-title">Northside<br><span>Circuit</span></div>
+      <div class="circuit-sub" id="last-updated">Loading...</div>
+    </div>
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
+  </header>
+
+  <div class="stats-strip" id="stats-strip">
+    <div class="stat-card"><div class="stat-label">Players</div><div class="stat-val" id="s-players">—</div></div>
+    <div class="stat-card"><div class="stat-label">Events Run</div><div class="stat-val" id="s-events">—</div></div>
+    <div class="stat-card"><div class="stat-label">Games</div><div class="stat-val" id="s-games">6</div></div>
+    <div class="stat-card"><div class="stat-label">Points Leader</div><div class="stat-val gold" id="s-leader">—</div></div>
+  </div>
+
+  <div id="main-content">
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      Fetching standings...
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-brand">Northside Circuit 2026</div>
+    <div class="footer-note">Powered by Google Sheets &bull; Updates automatically</div>
+  </footer>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────
+//  CONFIGURATION — paste your Google Sheets CSV URLs below
+// ─────────────────────────────────────────────────────────────────
+const RESULTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjB_3m9Q7WufaIipf7sqhxV6p9N2l9269GYad-WSIZw9Ny2gKa7fullKZWJZWegg/pubhtml?gid=467268246&single=true";
+const PLAYERS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjB_3m9Q7WufaIipf7sqhxV6p9N2l9269GYad-WSIZw9Ny2gKa7fullKZWJZWegg/pubhtml?gid=467268246&single=true";
+// ─────────────────────────────────────────────────────────────────
+
+const GAMES = [
+  { name: "Pokemon Showdown", icon: "⚡", color: "#F6C80A", abbr: "PKM" },
+  { name: "Halo Reach",       icon: "🎯", color: "#4A90D9", abbr: "HALO" },
+  { name: "Forza Horizon",    icon: "🏎️",  color: "#E8411C", abbr: "FRZ" },
+  { name: "Hearthstone",      icon: "🃏", color: "#C265F4", abbr: "HS" },
+  { name: "Smash Ultimate",   icon: "💥", color: "#E8A020", abbr: "SSB" },
+  { name: "Smash Melee",      icon: "🌀", color: "#34C9E0", abbr: "SSBM" },
+];
+
+const AVATAR_COLORS = [
+  ["rgba(83,59,212,0.25)","#A08EFF"],["rgba(52,201,224,0.2)","#34C9E0"],
+  ["rgba(255,215,0,0.15)","#FFD700"],["rgba(232,65,28,0.2)","#FF7A5C"],
+  ["rgba(246,200,10,0.2)","#F6C80A"],["rgba(194,101,244,0.2)","#C265F4"],
+  ["rgba(39,174,96,0.2)","#2ECC71"],["rgba(230,126,34,0.2)","#E67E22"],
+];
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  const headers = lines[0].split(",").map(h => h.replace(/"/g,"").trim());
+  return lines.slice(1).map(line => {
+    const cols = [];
+    let cur = ""; let inQ = false;
+    for (let ch of line) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
+      else { cur += ch; }
+    }
+    cols.push(cur.trim());
+    const row = {};
+    headers.forEach((h,i) => row[h] = (cols[i]||"").replace(/"/g,"").trim());
+    return row;
+  }).filter(r => r[headers[0]]);
+}
+
+function initials(name) {
+  return name.split(" ").map(w=>w[0]||"").join("").slice(0,2).toUpperCase();
+}
+
+function avatarStyle(idx) {
+  const [bg, color] = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+  return `background:${bg};color:${color};`;
+}
+
+function buildLeaderboard(players, results) {
+  // Build standings map
+  const standings = {};
+  const gameWins = {};
+
+  players.forEach(p => {
+    const name = p["Full Name"];
+    if (!name) return;
+    standings[name] = {
+      name, tag: p["Gamertag"] || "", pic: p["Profile Picture URL"] || "",
+      totalPts: 0, events: new Set(), wins: 0, gamePts: {}
+    };
+    GAMES.forEach(g => { standings[name].gamePts[g.name] = 0; });
+  });
+
+  results.forEach(r => {
+    const name = r["Player Name"];
+    if (!name || !standings[name]) return;
+    const pts = parseInt(r["Points Earned"]) || 0;
+    const game = r["Game"] || "";
+    const evt = r["Event Name"] || "";
+    const place = parseInt(r["Placement"]) || 99;
+
+    standings[name].totalPts += pts;
+    standings[name].events.add(evt);
+    if (place === 1) standings[name].wins++;
+    if (standings[name].gamePts[game] !== undefined) {
+      standings[name].gamePts[game] += pts;
+    }
+  });
+
+  // Per-game best player
+  GAMES.forEach(g => {
+    let best = null; let bestPts = 0;
+    Object.values(standings).forEach(p => {
+      if (p.gamePts[g.name] > bestPts) { bestPts = p.gamePts[g.name]; best = p.name; }
+    });
+    gameWins[g.name] = { player: best, pts: bestPts };
+  });
+
+  const ranked = Object.values(standings)
+    .filter(p => p.totalPts > 0 || players.find(pl => pl["Full Name"]===p.name))
+    .sort((a,b) => b.totalPts - a.totalPts);
+
+  // Count unique events
+  const allEvents = new Set(results.map(r => r["Event Name"]).filter(Boolean));
+  const maxPts = ranked[0]?.totalPts || 1;
+
+  // Update stat strip
+  document.getElementById("s-players").textContent = ranked.length;
+  document.getElementById("s-events").textContent = allEvents.size;
+  document.getElementById("s-leader").textContent = ranked[0]?.totalPts || "—";
+  document.getElementById("last-updated").textContent =
+    `Updated ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+
+  // Build HTML
+  let html = "";
+
+  // Podium (top 3)
+  const top3 = ranked.slice(0,3);
+  const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
+  const podiumClass = top3.length >= 3 ? ["p2","p1","p3"] : ["p1","p2","p3"];
+  const podiumRank = top3.length >= 3 ? ["2nd Place","1st Place","3rd Place"] : ["1st","2nd","3rd"];
+
+  html += `<div class="podium-section"><div class="section-label">Top Standings</div><div class="podium">`;
+  podiumOrder.forEach((p, i) => {
+    if (!p) return;
+    const idx = ranked.indexOf(p);
+    const avStyle = avatarStyle(idx);
+    const img = p.pic ? `<img src="${p.pic}" onerror="this.style.display='none';this.parentNode.innerHTML='${initials(p.name)}'">` : initials(p.name);
+    html += `<div class="podium-card ${podiumClass[i]}">
+      <div class="podium-rank">${podiumRank[i]}</div>
+      <div class="podium-avatar" style="${avStyle}">${img}</div>
+      <div class="podium-name">${p.name}</div>
+      <div class="podium-tag">${p.tag}</div>
+      <div class="podium-pts">${p.totalPts}</div>
+      <div class="podium-pts-label">pts</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  // Filter bar
+  html += `<div class="filters">
+    <button class="filter-btn active" onclick="filterTable('All',this)">All games</button>`;
+  GAMES.forEach(g => {
+    html += `<button class="filter-btn" onclick="filterTable('${g.name}',this)">${g.icon} ${g.name}</button>`;
+  });
+  html += `</div>`;
+
+  // Table
+  html += `<div class="table-wrap"><table>
+    <thead><tr>
+      <th>#</th><th>Player</th>
+      <th class="hide-sm">Main game</th>
+      <th class="r">Points</th>
+      <th class="r hide-sm">Events</th>
+      <th class="r hide-sm">Avg</th>
+      <th class="r">Wins</th>
+    </tr></thead>
+    <tbody id="lb-tbody"></tbody>
+  </table></div>`;
+
+  // Per-game breakdown
+  html += `<div class="breakdown-section"><div class="section-label">Per-Game Standings</div><div class="game-grid">`;
+  GAMES.forEach(g => {
+    const sorted = Object.values(standings)
+      .filter(p => p.gamePts[g.name] > 0)
+      .sort((a,b) => b.gamePts[g.name] - a.gamePts[g.name])
+      .slice(0,4);
+    html += `<div class="game-card">
+      <div class="game-card-title"><span class="game-icon">${g.icon}</span>${g.name}</div>`;
+    if (sorted.length === 0) {
+      html += `<div class="game-row"><span class="game-row-name" style="color:var(--muted);font-style:italic">No results yet</span></div>`;
+    } else {
+      sorted.forEach((p,i) => {
+        html += `<div class="game-row">
+          <span class="game-row-name">${i===0?'<span class="game-champ">LEADER &bull; </span>':''}${p.tag||p.name}</span>
+          <span class="game-row-pts">${p.gamePts[g.name]} pts</span>
+        </div>`;
+      });
+    }
+    html += `</div>`;
+  });
+  html += `</div></div>`;
+
+  document.getElementById("main-content").innerHTML = html;
+
+  // Store data globally for filtering
+  window._ranked = ranked;
+  window._maxPts = maxPts;
+  window._standings = standings;
+  renderTable("All");
+}
+
+function renderTable(game) {
+  const ranked = window._ranked;
+  const maxPts = window._maxPts;
+  const filtered = game === "All" ? ranked : ranked.filter(p => {
+    // Check if player has results for this game
+    return p.gamePts && p.gamePts[game] > 0;
+  });
+
+  const tbody = document.getElementById("lb-tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = filtered.map((p, i) => {
+    const idx = ranked.indexOf(p);
+    const avStyle = avatarStyle(idx);
+    const img = p.pic ? `<img src="${p.pic}" onerror="this.style.display='none';this.parentNode.innerHTML='${initials(p.name)}'">` : initials(p.name);
+    const displayPts = game === "All" ? p.totalPts : p.gamePts[game];
+    const barPct = Math.round((displayPts / maxPts) * 100);
+    const eventsPlayed = p.events.size;
+    const avg = eventsPlayed > 0 ? (p.totalPts / eventsPlayed).toFixed(1) : "—";
+    const rankClass = i < 3 ? "top" : "";
+
+    return `<tr>
+      <td><span class="rank-num ${rankClass}">${i+1}</span></td>
+      <td>
+        <div class="player-cell">
+          <div class="avatar" style="${avStyle}">${img}</div>
+          <div><div class="p-name">${p.name}</div><div class="p-tag">${p.tag}</div></div>
+        </div>
+      </td>
+      <td class="hide-sm"></td>
+      <td class="pts-cell">
+        <span class="pts-main">${displayPts}</span>
+        <div class="pts-bar-row"><div class="pts-bar"><div class="pts-fill" style="width:${barPct}%"></div></div></div>
+      </td>
+      <td class="events-cell hide-sm">${eventsPlayed}</td>
+      <td class="avg-cell hide-sm">${avg}</td>
+      <td class="wins-cell">${p.wins}</td>
+    </tr>`;
+  }).join("");
+}
+
+function filterTable(game, btn) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderTable(game);
+}
+
+// ── MAIN FETCH ────────────────────────────────────────────────────
+async function loadData() {
+  const isDemo = RESULTS_CSV_URL.includes("PASTE_");
+
+  if (isDemo) {
+    document.getElementById("main-content").innerHTML = `
+      <div class="setup-box">
+        <h2>Almost there!</h2>
+        <p>Your leaderboard is ready — just connect it to your Google Sheet.</p>
+        <p>Open this HTML file in a text editor and replace:</p>
+        <p><code>https://docs.google.com/spreadsheets/d/e/2PACX-1vRjB_3m9Q7WufaIipf7sqhxV6p9N2l9269GYad-WSIZw9Ny2gKa7fullKZWJZWegg/pubhtml?gid=467268246&single=true</code></p>
+        <p><code>https://docs.google.com/spreadsheets/d/e/2PACX-1vRjB_3m9Q7WufaIipf7sqhxV6p9N2l9269GYad-WSIZw9Ny2gKa7fullKZWJZWegg/pubhtml?gid=467268246&single=true</code></p>
+        <p>with the two CSV URLs from your published Google Sheet.<br>See the <strong>How To Publish</strong> sheet in your Excel file for step-by-step instructions.</p>
+      </div>`;
+    document.getElementById("last-updated").textContent = "Setup required";
+    return;
+  }
+
+  try {
+    const [resultsRes, playersRes] = await Promise.all([
+      fetch(RESULTS_CSV_URL),
+      fetch(PLAYERS_CSV_URL)
+    ]);
+    const resultsText = await resultsRes.text();
+    const playersText = await playersRes.text();
+    const results = parseCSV(resultsText);
+    const players = parseCSV(playersText);
+    buildLeaderboard(players, results);
+  } catch (err) {
+    document.getElementById("main-content").innerHTML = `
+      <div class="error-box">
+        Could not load data from Google Sheets.<br><br>
+        Make sure your sheet is published to the web and the CSV URLs are correct.<br>
+        <small style="opacity:0.7;margin-top:8px;display:block">${err.message}</small>
+      </div>`;
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
