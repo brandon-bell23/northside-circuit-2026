@@ -93,7 +93,7 @@
 
   /* ── FILTERS ── */
   .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-  .filter-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border-dim); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+  .filter-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-dim); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; flex: 1; text-align: center; min-width: 0; }
   .filter-btn:hover { border-color: var(--brand); color: var(--white); }
   .filter-btn.active { background: var(--brand); border-color: var(--brand); color: var(--white); font-weight: 500; }
 
@@ -283,7 +283,15 @@ function buildLeaderboard(players, results) {
 
   document.getElementById("s-players").textContent = ranked.length;
   document.getElementById("s-events").textContent  = allEvents.size;
-  document.getElementById("s-leader").textContent  = ranked[0]?.totalPts || "—";
+  const leader = ranked[0];
+  const leaderEl = document.getElementById("s-leader");
+  if (leader) {
+    leaderEl.textContent = leader.tag || leader.name;
+    leaderEl.style.fontSize = "18px";
+    leaderEl.style.paddingTop = "4px";
+  } else {
+    leaderEl.textContent = "—";
+  }
   document.getElementById("last-updated").textContent =
     `Updated ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
 
@@ -394,7 +402,6 @@ function renderTable(game) {
           <div>
             <div class="p-tag">${p.tag || p.name}</div>
             <div class="p-name">${p.name}</div>
-            ${p.region ? `<div class="p-region">${p.region}</div>` : ''}
           </div>
         </div>
       </td>
